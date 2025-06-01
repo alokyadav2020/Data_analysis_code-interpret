@@ -65,6 +65,22 @@ Visit `http://localhost:8000` in your browser! 🎉
    - Check the generated analysis code
    - Download or share the results
 
+## 🖼️ Demo
+
+Below are some screenshots showcasing the app in action:
+
+| Home Page | File Upload | Chart Selection |
+|---|---|---|
+| ![Home](screanshorts/Screenshot_1-6-2025_152813_127.0.0.1.jpeg) | ![Upload](screanshorts/Screenshot_1-6-2025_155313_127.0.0.1.jpeg) | ![Chart Type](screanshorts/Screenshot_1-6-2025_155535_127.0.0.2.jpeg) |
+
+| Chart Output | Progress | More Charts |
+|---|---|---|
+| ![Chart Output](screanshorts/Screenshot_1-6-2025_155733_127.0.0.1.jpeg) | ![Progress](screanshorts/Screenshot_1-6-2025_16054_127.0.0.1.jpeg) | ![More Charts](screanshorts/Screenshot_1-6-2025_16236_127.0.0.1.jpeg) |
+
+| Example |  |
+|---|---|
+| ![Example](screanshorts/Screenshot_1-6-2025_16430_127.0.0.1.jpeg) | ![Pic 1](screanshorts/pic_1.jpeg) |
+
 ## 📁 Project Structure
 
 ```
