@@ -42,9 +42,15 @@ async def create_upload_file(
     from fastapi.responses import JSONResponse
     import base64
     status_steps = []
+    logging.info(f"File upload started: {file.filename}")
     status_steps.append("1. File uploaded...")
+    
     if file.content_type not in ALLOWED_CONTENT_TYPES:
-        return JSONResponse(status_code=400, content={"detail": f"Invalid file type: {file.content_type}. Only CSV and Excel files (XLS, XLSX) are allowed.", "status_steps": status_steps})
+        logging.warning(f"Invalid file type attempted: {file.content_type}")
+        return JSONResponse(status_code=400, content={
+            "detail": f"Invalid file type: {file.content_type}. Only CSV and Excel files (XLS, XLSX) are allowed.",
+            "status_steps": status_steps
+        })
 
     temp_dir = "temp_uploads"
     if not os.path.exists(temp_dir):
@@ -52,40 +58,43 @@ async def create_upload_file(
     temp_path = os.path.join(temp_dir, file.filename)
     with open(temp_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+    logging.info(f"File saved temporarily at: {temp_path}")
     status_steps.append("2. Processing file...")
 
     chart_type = chartType if chartType else "line"
+    logging.info(f"Selected chart type: {chart_type}")
 
     try:
         # Step 3: Generate code with Gemini
+        logging.info("Starting code generation with Gemini")
         from src.services.gemini_service import generate_analysis_code
         generated_code = generate_analysis_code(temp_path, chart_type)
-        logging.info(f"Generated code:\n{generated_code}")
-
         status_steps.append("3. Code generated...")
+        
         # Step 4: Run code in E2B sandbox
+        logging.info("Starting code execution in sandbox")
         from src.pipeline.pipeline import run_data_analysis_pipeline
         images_base64 = run_data_analysis_pipeline(temp_path, chart_type)
-        logging.info(f"Generated {len(images_base64)} images.")
         status_steps.append("4. Code executed...")
-        # Prepare HTML for all images
+        
+        # Prepare HTML for images
+        logging.info("Preparing chart HTML")
         chart_html = "".join([
             f"<img src='data:image/png;base64,{img}' style='max-width:100%;height:auto;margin-bottom:1em;' />"
             for img in images_base64
         ])
         status_steps.append("5. Chart/Graph generated and displayed below.")
+        
     except Exception as e:
+        logging.error(f"Error during processing: {str(e)}", exc_info=True)
         status_steps.append("Error during code execution.")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "detail": str(e),
-                "status_steps": status_steps
-            }
-        )
+        return JSONResponse(status_code=500, content={"detail": str(e), "status_steps": status_steps})
     finally:
-        os.remove(temp_path)
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+            logging.info(f"Temporary file removed: {temp_path}")
 
+    logging.info(f"Processing completed successfully for {file.filename}")
     return {
         "filename": file.filename,
         "content_type": file.content_type,
